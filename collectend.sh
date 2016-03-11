@@ -1,5 +1,15 @@
 #!/bin/bash
 
+function cleanup() {
+	tput cnorm
+}
+
+function ctrl_c() {
+	cleanup
+}
+
+trap ctrl_c INT
+tput civis
 ## processes * input folders
 while (($# > 0)); do
    folder=$(basename $1)
@@ -7,11 +17,11 @@ while (($# > 0)); do
    items=$(echo ${folder}/*.end | tr ' ' '\n' | wc -l)
    completed=0
 	## stages is percentage bar width in columns
-	stages=$(( $(tput cols) - 40 ))
 	completed_stages=0
    ## print initial percentage
       printf "\rprocessing '%s' [" ${folder}
       printf "."
+		stages=$(( $(tput cols) - 24 - ${#folder} ))
       for i in $(seq $((completed_stages+2)) ${stages}); do
          printf " "
       done
@@ -22,7 +32,7 @@ while (($# > 0)); do
          break
       done
    for file in $folder/*.end; do
-      tail -n +2 ${file} >> ${folder}.ssv
+      tail -n1 ${file} >> ${folder}.ssv
       completed=$((completed+1))
 		new_completed_stages=$(( 100*${completed}*${stages}/(100*${items}) ))
 		if (( $new_completed_stages != $completed_stages )); then
@@ -42,3 +52,4 @@ while (($# > 0)); do
 	zip -9 ${folder}.zip ${folder}.ssv > /dev/null
 	rm ${folder}.ssv
 done
+cleanup
