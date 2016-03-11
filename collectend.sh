@@ -1,11 +1,13 @@
 #!/bin/bash
 
-function cleanup() {
+function cleanup_andquit() {
 	tput cnorm
+	exit
 }
 
 function ctrl_c() {
-	cleanup
+	echo ""
+	cleanup_andquit
 }
 
 trap ctrl_c INT
@@ -52,4 +54,4 @@ while (($# > 0)); do
 	zip -9 ${folder}.zip ${folder}.ssv > /dev/null
 	rm ${folder}.ssv
 done
-cleanup
+cleanup_andquit
